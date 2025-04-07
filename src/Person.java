@@ -36,7 +36,13 @@ public class Person implements Comparable<Person>{
         return List.copyOf(children);
     }
 
+    public String getFname() {
+        return fname;
+    }
 
+    public String getLname() {
+        return lname;
+    }
 
     @Override
     public int compareTo(Person o) {
