@@ -33,7 +33,7 @@ public class Person implements Comparable<Person>{
     }
 
     public List<Person> getChildren(){
-        List.copyOf(children);
+        return List.copyOf(children);
     }
 
 
