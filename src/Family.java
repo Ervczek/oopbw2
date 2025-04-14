@@ -9,17 +9,14 @@ public class Family {
         for(Person p : peopleToAdd)
             add(p);
     }
-
     public void add(Person personToAdd){
         String newKey = personToAdd.getFname() + " " + personToAdd.getLname();
-        if(people.containsKey(newKey))
+        if (people.containsKey(newKey))
             return;
         people.put(newKey, personToAdd);
     }
-
     public Person get(String key){
-       return people.get(key);
+        return people.get(key);
     }
 }
-
 

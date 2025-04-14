@@ -5,7 +5,7 @@ import java.util.List;
 public class Main {
     public static void main(String[] args) {
 
-    List<Person> people = new ArrayList<>();
+        List<Person> people = new ArrayList<>();
         Person parent = new Person("Alojzy", "Czeremcha", LocalDate.of(1903,12,7));
         Person child1 = new Person("Grażyna", "Duda", LocalDate.of(1951,4,7));
         Person child2 = new Person("Ksawery", "Czeremcha", LocalDate.of(1955,8,12));
@@ -21,6 +21,9 @@ public class Main {
         parent.adopt(child3);
         parent.adopt(child4);
         System.out.println("ufjjdjjdjdd");
+
+
+
 
 
     }
