@@ -8,11 +8,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class Person implements Comparable<Person>{
     private String fname, lname;
     private LocalDate birthDate;
-
+    private Person father;
+    private Person mother;
     private LocalDate deathDate;
     private Set<Person> children;
     public boolean adopt(Person child){
@@ -83,11 +86,10 @@ public class Person implements Comparable<Person>{
         }
         if (isNotEmpty(colums[2])){
             deathDate = LocalDate.parse(colums[2], formatter);
-            if(isNotEmpty(colums[1]) && deathDate.isBefore(birthDate)){
+            if (isNotEmpty(colums[1]) && deathDate.isBefore(birthDate)){
                 throw new NegativeLifespanException(flname[0], flname[1]);
             }
         }
-
         return new Person(flname[0], flname[1], birthDate, deathDate);
     }
 
@@ -99,10 +101,22 @@ public class Person implements Comparable<Person>{
             br.readLine();
             while((line = br.readLine()) != null){
                 Person readPerson = fromCsvLine(line);
-                for(Person existingPerson : people){
+                if (people.size() == 0){
+                    people.add(readPerson);
+                }
+                for (int i = 0; i < people.size(); i++){
+                    Person existingPerson = people.get(i);
                     if(!existingPerson.fname.equals(readPerson.fname) ||
-                        !existingPerson.lname.equals(readPerson.lname)) {
-                            people.add(readPerson);
+                            !existingPerson.lname.equals(readPerson.lname)){
+                        people.add(readPerson);
+                    }
+                    if(!existingPerson.fname.equals(readPerson.fname) ||
+                            !existingPerson.lname.equals(readPerson.lname)){
+                        people.add(readPerson);
+                    }
+                    if(!existingPerson.fname.equals(readPerson.fname) ||
+                            !existingPerson.lname.equals(readPerson.lname)){
+                        people.add(readPerson);
                     }
                 }
 
@@ -117,9 +131,56 @@ public class Person implements Comparable<Person>{
         return people;
     }
 
+    public String toUMLObject(){
+        Function<String, String> addQuotes = text -> "\"" + text + "\"";
+        Function<Person, String> getFullnameWithSpace = pipla -> pipla.fname + " " + pipla.lname;
+        Function<Person, String> getFullname = pipla -> pipla.fname + pipla.lname;
+        Function<Person, String> toUMLline = pipla ->
+                String.format("object " + addQuotes.apply(getFullnameWithSpace.apply(pipla))
+                        + " as " + getFullname.apply(pipla));
+        return toUMLline.apply(this);
+    }
 
+    public String toUMLRelation(){
+        Function<Person, String> getFullname = pipla -> pipla.fname + pipla.lname;
+        Function<Person, String> getFatherRelation = pipla -> {
+            if (pipla.father != null)
+                return getFullname.apply(pipla) + " <-- " + getFullname.apply(pipla.father);
+            return "";
+        };
+        Function<Person, String> getMotherRelation = pipla -> {
+            if (pipla.mother != null)
+                return getFullname.apply(pipla) + " <-- " + getFullname.apply(pipla.mother);
+            return "";
+        };
+        Function<Person, String> getAllRelations = pipla ->{
+            String motherString = getMotherRelation.apply(pipla);
+            String fatherString = getFatherRelation.apply(pipla);
+            if (motherString != "" && fatherString != ""){
+                return motherString + "\n" + fatherString;
+            }
+            return motherString + fatherString;
+        };
+        return getAllRelations.apply(this);
+    }
 
     public static boolean isNotEmpty(String s){
         return s != null && s != "" && s != " " && s != "\t";
+    }
+
+
+    public static String toUMLFile(List<Person> people){
+        Function<List<Person>, String> convertToUML = list -> {
+            String openningTag = "@startuml";
+            String endingTag = "@enduml";
+            List<String> objectLines = list.stream().map(piple -> piple.toUMLObject()).collect(Collectors.toList());
+            List<String> relationLines = list.stream().map(piple -> piple.toUMLRelation()).collect(Collectors.toList());
+            return openningTag + "\n" + String.join("\n", objectLines) + endingTag  + String.join("\n", relationLines) + endingTag;
+        };
+        return convertToUML.apply(people);
+    }
+
+    public void setFather(Person parent) {
+        this.father = parent;
     }
 }
