@@ -180,6 +180,12 @@ public class Person implements Comparable<Person>{
         return convertToUML.apply(people);
     }
 
+
+    public static List<Person> filterList(List<Person> people, String key){
+        Function<Person, String> getFullname = pipla -> pipla.fname + pipla.lname;
+        return people.stream().filter(piple -> getFullname.apply(piple).contains(key)).collect(Collectors.toList());
+    }
+
     public void setFather(Person parent) {
         this.father = parent;
     }
