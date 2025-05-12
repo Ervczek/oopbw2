@@ -1,7 +1,4 @@
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -11,7 +8,7 @@ import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class Person implements Comparable<Person>{
+public class Person implements Comparable<Person>, Serializable {
     private String fname, lname;
     private LocalDate birthDate;
     private Person father;
@@ -168,25 +165,72 @@ public class Person implements Comparable<Person>{
         return s != null && s != "" && s != " " && s != "\t";
     }
 
-
     public static String toUMLFile(List<Person> people){
-        Function<List<Person>, String> convertToUML = list -> {
+        Function<List<Person>, String> convertToUML = list ->{
             String openningTag = "@startuml";
             String endingTag = "@enduml";
-            List<String> objectLines = list.stream().map(piple -> piple.toUMLObject()).collect(Collectors.toList());
-            List<String> relationLines = list.stream().map(piple -> piple.toUMLRelation()).collect(Collectors.toList());
-            return openningTag + "\n" + String.join("\n", objectLines) + endingTag  + String.join("\n", relationLines) + endingTag;
+            List<String> objectLines = list.stream().map(pipla -> pipla.toUMLObject()).collect(Collectors.toList());
+            List<String> relationLines = list.stream().map(pipla -> pipla.toUMLRelation()).collect(Collectors.toList());
+            return openningTag + "\n" + String.join("\n", objectLines) + String.join("\n", relationLines) + endingTag;
         };
-        return convertToUML.apply(people);
-    }
 
+        return convertToUML.apply(people);
+
+    }
 
     public static List<Person> filterList(List<Person> people, String key){
         Function<Person, String> getFullname = pipla -> pipla.fname + pipla.lname;
-        return people.stream().filter(piple -> getFullname.apply(piple).contains(key)).collect(Collectors.toList());
+
+
+        return people.stream()
+                .filter(pipla -> getFullname.apply(pipla)
+                        .contains(key))
+                .collect(Collectors.toList());
     }
+
+    public static List<Person> sortPeopleByBirthYear(List<Person> people){
+        return people.stream().sorted().collect(Collectors.toList());
+    }
+
 
     public void setFather(Person parent) {
         this.father = parent;
     }
+
+    public static void saveToBinaryFile(List<Person> people, String path){
+        try{
+            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(path));
+            oos.writeObject(people);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    public static List<Person> readFromBinaryFile(String path) {
+        List<Person> people = new ArrayList<>();
+        try{
+            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path));
+            Object obj = ois.readObject();
+            if (obj instanceof List){
+                List<?> list = (List<?>) obj;
+                for (Object o : list){
+                    if ( o instanceof Person){
+                        people.add((Person) o);
+                    }
+                }
+            }
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        return people;
+
+    }
+
 }

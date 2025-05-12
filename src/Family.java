@@ -19,4 +19,3 @@ public class Family {
         return people.get(key);
     }
 }
-
